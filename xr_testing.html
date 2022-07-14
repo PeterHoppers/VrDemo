@@ -154,6 +154,8 @@
     function enableVideoXR() {
       window.dispatchEvent(new window.Event('vrdisplayactivate'));
       let oldcanvas = document.querySelector("body > div > canvas:first-of-type");
-      oldcanvas.style.display = "none";
+      if (oldcanvas) {
+        oldcanvas.style.display = "none";
+      }
     }
 </script>
