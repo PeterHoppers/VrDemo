@@ -42,7 +42,7 @@
   import * as THREE from 'three';
   import {VRButton} from './build/VRButton.js';
 
-  const renderer;
+  let renderer;
   
   function main() {
     const canvas = document.querySelector('#c');
@@ -123,17 +123,24 @@
   
     renderer.setAnimationLoop(render);
   }
-
-  function endSession() {
-    renderer.getSession().end();
-  }
   
   main();
 
   document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
-        endSession();
-        (function(window, videojs) {
+        renderer.xr.getSession().end().then(() => {
+          createWindowPlayer();
+        });
+      }
+      else if (event.code == "KeyP") {
+        window.examplePlayer.play();
+      } else if (event.code == "KeyQ") {
+        //enableVideoXR();
+      }
+    });
+
+    function createWindowPlayer() {
+      (function(window, videojs) {
           var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
           var xr = window.xr = examplePlayer.xr();
 
@@ -149,13 +156,7 @@
             });
         });  
         }(window, window.videojs));  
-      }
-      else if (event.code == "KeyP") {
-        window.examplePlayer.play();
-      } else if (event.code == "KeyQ") {
-        //enableVideoXR();
-      }
-    });
+    }
     
     function enableVideoXR() {
       window.dispatchEvent(new window.Event('vrdisplayactivate'));
