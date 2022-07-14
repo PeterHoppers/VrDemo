@@ -41,10 +41,12 @@
 <script type="module">
   import * as THREE from 'three';
   import {VRButton} from './build/VRButton.js';
+
+  const renderer;
   
   function main() {
     const canvas = document.querySelector('#c');
-    const renderer = new THREE.WebGLRenderer({canvas});
+    renderer = new THREE.WebGLRenderer({canvas});
     renderer.xr.enabled = true;
     document.body.appendChild(VRButton.createButton(renderer));
   
@@ -121,12 +123,16 @@
   
     renderer.setAnimationLoop(render);
   }
+
+  function endSession() {
+    renderer.getSession().end();
+  }
   
   main();
-  </script>
-<script>
-    document.addEventListener("keydown", (event) => {
+
+  document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
+        endSession();
         (function(window, videojs) {
           var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
           var xr = window.xr = examplePlayer.xr();
@@ -158,4 +164,6 @@
         oldcanvas.style.display = "none";
       }
     }
-</script>
+
+ 
+  </script>
