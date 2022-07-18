@@ -125,12 +125,12 @@
   }
   
   main();
-  createWindowPlayer();
+  //createWindowPlayer();
 
   document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
         renderer.xr.getSession().end().then(() => {
-          //createWindowPlayer();
+          createWindowPlayer();
         });
       }
       else if (event.code == "KeyP") {
@@ -144,6 +144,17 @@
       (function(window, videojs) {
           var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
           var xr = window.xr = examplePlayer.xr();
+
+          xr.one("initialized", () => {
+            navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+                if (supported) {
+                    enableVideoXR();
+                    window.examplePlayer.play();
+                } else {
+                    console.log('web xr device not found, using orbit controls');
+                }
+            });
+          }); 
         }(window, window.videojs));  
     }
     
