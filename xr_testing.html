@@ -125,17 +125,18 @@
   }
   
   main();
+  createWindowPlayer();
 
   document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
         renderer.xr.getSession().end().then(() => {
-          createWindowPlayer();
+          //createWindowPlayer();
         });
       }
       else if (event.code == "KeyP") {
         window.examplePlayer.play();
       } else if (event.code == "KeyQ") {
-        //enableVideoXR();
+        enableVideoXR();
       }
     });
 
@@ -143,27 +144,11 @@
       (function(window, videojs) {
           var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
           var xr = window.xr = examplePlayer.xr();
-
-          console.log(document.getElementById("VRButton"));
-
-          xr.one("initialized", () => {
-            navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
-                if (supported) {
-                    enableVideoXR();
-                } else {
-                    console.log('web xr device not found, using orbit controls');
-                }
-            });
-        });  
         }(window, window.videojs));  
     }
     
     function enableVideoXR() {
-      window.dispatchEvent(new window.Event('vrdisplayactivate'));
-      let oldcanvas = document.querySelector("body > div > canvas:first-of-type");
-      if (oldcanvas) {
-        oldcanvas.style.display = "none";
-      }
+      window.dispatchEvent(new window.Event('vrdisplayactivate'));      
     }
 
  
