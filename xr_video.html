@@ -59,6 +59,8 @@
       } else if (event.code == "KeyQ") {
         window.examplePlayer.play(); 
         enableVideoXR();
+      } else if (event.code == "KeyL") {
+        window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
       }
     });
     
