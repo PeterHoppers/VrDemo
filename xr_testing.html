@@ -130,8 +130,14 @@
   document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
         renderer.xr.getSession().end().then(() => {
-          enableVideoXR();
-          window.examplePlayer.play();
+          navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+                if (supported) {
+                    enableVideoXR();
+                    window.examplePlayer.play();
+                } else {
+                    console.log('web xr device not found, using orbit controls');
+                }
+            });
         });
       }
       else if (event.code == "KeyP") {
