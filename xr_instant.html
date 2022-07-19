@@ -110,6 +110,7 @@
   // At this point the session object is no longer usable and should be
   // discarded.
   function onSessionEnded(event) {
+    console.log("We've ended the session!");
     xrSession = null;
     xrButton.textContent = 'Enter VR';
 
@@ -175,14 +176,8 @@
   document.addEventListener("keydown", (event) => {
     if (event.code == "KeyS") {
       xrSession.end().then(() => {
-        navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
-            if (supported) {
-                enableVideoXR();
-                window.examplePlayer.play();
-            } else {
-                console.log('web xr device not found, using orbit controls');
-            }
-          });
+        enableVideoXR();  
+        window.examplePlayer.play();      
       });
     }
     else if (event.code == "KeyP") {
@@ -200,6 +195,7 @@
   }
   
   function enableVideoXR() {
+    console.log("Enabling another session!");
     window.dispatchEvent(new window.Event('vrdisplayactivate'));      
   }
 
