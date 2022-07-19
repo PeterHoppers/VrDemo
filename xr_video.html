@@ -44,6 +44,20 @@
       xr = window.xr = examplePlayer.xr();
   }(window, window.videojs));
 
+    window.addEventListener("load", () => {
+      console.log("Loaded!");
+      setTimeout(() => {
+        console.log("In has been 5 seconds");
+        navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+              if (supported) {
+                  enableVideoXR();
+              } else {
+                  console.log('web xr device not found, using orbit controls');
+              }
+          });
+      }, 5000);
+    });
+
     document.addEventListener("keydown", (event) => {
       if (event.code == "KeyS") {
           navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
