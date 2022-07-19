@@ -173,6 +173,16 @@
 
   createWindowPlayer();
 
+  window.addEventListener("load", () => { 
+      console.log("Loaded!");
+      setTimeout(() => {
+        console.log("In has been 5 seconds");
+        enableVideoXR();  
+        window.examplePlayer.play();   
+      }, 5000);
+    });
+
+
   document.addEventListener("keydown", (event) => {
     if (event.code == "KeyS") {
       xrSession.end().then(() => {
