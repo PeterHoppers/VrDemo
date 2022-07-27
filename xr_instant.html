@@ -1,10 +1,8 @@
+@@ -1,166 +0,0 @@
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
-    <meta name='mobile-web-app-capable' content='yes'>
-    <meta name='apple-mobile-web-app-capable' content='yes'>
     <title>WebXR Testing Instant Transitions</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
@@ -22,196 +20,147 @@
     <link href="./videojs-xr.css" rel="stylesheet">
   </head>
   <body>
-    <main>
+    <canvas id="c" data-engine="three.js r142" width="837" height="927"></canvas>
+    <main style="text-align: center;">
       <video id="videojs-xr-player" class="video-js vjs-default-skin" controls style="display:none">
         <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
       </video>
     </main>  
-    <button id="xr-button" class="barebones-button" disabled>XR not found</button>
-  </body>
+    </body>
 </html>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "./ref/three.module.js"
+    }
+  }
+  </script>
 <script async="" src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 <script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
 <script src = "./videojs-xr.js"></script>
-<script>
-  (function () {
-  'use strict';
+<script type="module">
+  import * as THREE from 'three';
+  import {VRButton} from './ref/VRButton.js';
 
-  // XR globals.
-  let xrButton = document.getElementById('xr-button');
-  let xrSession = null;
-  let xrRefSpace = null;
-
-  // WebGL scene globals.
-  let gl = null;
-
-  // Checks to see if WebXR is available and, if so, requests an XRDevice
-  // that is connected to the system and tests it to ensure it supports the
-  // desired session options.
-  function initXR() {
-    // Is WebXR available on this UA?
-    if (navigator.xr) {
-      // If the device allows creation of exclusive sessions set it as the
-      // target of the 'Enter XR' button.
-      navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
-        if (supported) {
-          // Updates the button to start an XR session when clicked.
-          xrButton.addEventListener('click', onButtonClicked);
-          xrButton.textContent = 'Enter VR';
-          xrButton.disabled = false;
-        }
+  let renderer;
+  
+  function main() {
+    const canvas = document.querySelector('#c');
+    renderer = new THREE.WebGLRenderer({canvas});
+    renderer.xr.enabled = true;
+    document.body.appendChild(VRButton.createButton(renderer));
+  
+    const fov = 75;
+    const aspect = 2;  // the canvas default
+    const near = 0.1;
+    const far = 50;
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    camera.position.set(0, 1.6, 1);
+  
+    const scene = new THREE.Scene();
+  
+    {
+      const color = 0xFFFFFF;
+      const intensity = 1;
+      const light = new THREE.DirectionalLight(color, intensity);
+      light.position.set(-1, 2, 4);
+      scene.add(light);
+    }
+  
+    const boxWidth = 1;
+    const boxHeight = 1;
+    const boxDepth = 1;
+    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+  
+    function makeInstance(geometry, color, x) {
+      const material = new THREE.MeshPhongMaterial({color});
+  
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+  
+      cube.position.x = x;
+      cube.position.y = 1.6;
+      cube.position.z = -2;
+  
+      return cube;
+    }
+  
+    const cubes = [
+      makeInstance(geometry, 0x44aa88,  0),
+      makeInstance(geometry, 0x8844aa, -2),
+      makeInstance(geometry, 0xaa8844,  2),
+    ];
+  
+    function resizeRendererToDisplaySize(renderer) {
+      const canvas = renderer.domElement;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      const needResize = canvas.width !== width || canvas.height !== height;
+      if (needResize) {
+        renderer.setSize(width, height, false);
+      }
+      return needResize;
+    }
+  
+    function render(time) {
+      time *= 0.001;
+  
+      if (resizeRendererToDisplaySize(renderer)) {
+        const canvas = renderer.domElement;
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+      }
+  
+      cubes.forEach((cube, ndx) => {
+        const speed = 1 + ndx * .1;
+        const rot = time * speed;
+        cube.rotation.x = rot;
+        cube.rotation.y = rot;
       });
+  
+      renderer.render(scene, camera);
     }
-  }
-
-  // Called when the user clicks the button to enter XR. If we don't have a
-  // session we'll request one, and if we do have a session we'll end it.
-  function onButtonClicked() {
-    if (!xrSession) {
-      navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
-    } else {
-      xrSession.end();
-    }
-  }
-
-  // Called when we've successfully acquired a XRSession. In response we
-  // will set up the necessary session state and kick off the frame loop.
-  function onSessionStarted(session) {
-    xrSession = session;
-    xrButton.textContent = 'Exit VR';
-
-    // Listen for the sessions 'end' event so we can respond if the user
-    // or UA ends the session for any reason.
-    session.addEventListener('end', onSessionEnded);
-
-    // Create a WebGL context to render with, initialized to be compatible
-    // with the XRDisplay we're presenting to.
-    let canvas = document.createElement('canvas');
-    gl = canvas.getContext('webgl', { xrCompatible: true });
-
-    // Use the new WebGL context to create a XRWebGLLayer and set it as the
-    // sessions baseLayer. This allows any content rendered to the layer to
-    // be displayed on the XRDevice.
-    session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
-
-    // Get a reference space, which is required for querying poses. In this
-    // case an 'local' reference space means that all poses will be relative
-    // to the location where the XRDevice was first detected.
-    session.requestReferenceSpace('local').then((refSpace) => {
-      xrRefSpace = refSpace;
-
-      // Inform the session that we're ready to begin drawing.
-      session.requestAnimationFrame(onXRFrame);
-    });
-  }
-
-  // Called either when the user has explicitly ended the session by calling
-  // session.end() or when the UA has ended the session for any reason.
-  // At this point the session object is no longer usable and should be
-  // discarded.
-  function onSessionEnded(event) {
-    console.log("We've ended the session!");
-    xrSession = null;
-    xrButton.textContent = 'Enter VR';
-
-    // In this simple case discard the WebGL context too, since we're not
-    // rendering anything else to the screen with it.
-    gl = null;
-  }
-
-  // Called every time the XRSession requests that a new frame be drawn.
-  function onXRFrame(time, frame) {
-    let session = frame.session;
-
-    // Inform the session that we're ready for the next frame.
-    session.requestAnimationFrame(onXRFrame);
-
-    // Get the XRDevice pose relative to the reference space we created
-    // earlier.
-    let pose = frame.getViewerPose(xrRefSpace);
-
-    // Getting the pose may fail if, for example, tracking is lost. So we
-    // have to check to make sure that we got a valid pose before attempting
-    // to render with it. If not in this case we'll just leave the
-    // framebuffer cleared, so tracking loss means the scene will simply
-    // disappear.
-    if (pose) {
-      let glLayer = session.renderState.baseLayer;
-
-      // If we do have a valid pose, bind the WebGL layer's framebuffer,
-      // which is where any content to be displayed on the XRDevice must be
-      // rendered.
-      gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
-
-      // Update the clear color so that we can observe the color in the
-      // headset changing over time.
-      gl.clearColor(Math.cos(time / 2000),
-                    Math.cos(time / 4000),
-                    Math.cos(time / 6000), 1.0);
-
-      // Clear the framebuffer
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-      // Normally you'd loop through each of the views reported by the frame
-      // and draw them into the corresponding viewport here, but we're
-      // keeping this sample slim so we're not bothering to draw any
-      // geometry.
-      /*for (let view of pose.views) {
-        let viewport = glLayer.getViewport(view);
-        gl.viewport(viewport.x, viewport.y,
-                    viewport.width, viewport.height);
-
-        // Draw a scene using view.projectionMatrix as the projection matrix
-        // and view.transform to position the virtual camera. If you need a
-        // view matrix, use view.transform.inverse.matrix.
-      }*/
-    }
-  }
-
-  // Start the XR application.
-  initXR();
-
-  createWindowPlayer();
-
-  document.getElementById("xr-button").addEventListener("click", () => { 
-      console.log("Clicked!!");
-      setTimeout(() => {
-        console.log("In has been 5 seconds since click");
-        xrSession.end();        
-      }, 2000);
-
-      setTimeout(() => {
-        enableVideoXR();  
-        window.examplePlayer.play();   
-      }, 1000);
-    });
-
-
-  document.addEventListener("keydown", (event) => {
-    if (event.code == "KeyS") {
-      xrSession.end().then(() => {
-        enableVideoXR();  
-        window.examplePlayer.play();      
-      });
-    }
-    else if (event.code == "KeyP") {
-      window.examplePlayer.play();
-    } else if (event.code == "KeyQ") {
-      enableVideoXR();
-    }
-  });
-
-  function createWindowPlayer() {
-    (function(window, videojs) {
-        var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
-        var xr = window.xr = examplePlayer.xr();
-      }(window, window.videojs));  
+  
+    renderer.setAnimationLoop(render);
   }
   
-  function enableVideoXR() {
-    console.log("Enabling another session!");
-    window.dispatchEvent(new window.Event('vrdisplayactivate'));      
-  }
+  main();
 
-})();
-</script>
+  document.addEventListener("keydown", (event) => {
+      if (event.code == "KeyS") {
+        renderer.xr.getSession().end().then(() => {
+          createWindowPlayer();
+        });
+      }
+      else if (event.code == "KeyP") {
+        window.examplePlayer.play();
+      } else if (event.code == "KeyQ") {
+        enableVideoXR();
+      }
+    });
+
+    function createWindowPlayer() {
+      (function(window, videojs) {
+          var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
+          var xr = window.xr = examplePlayer.xr();
+
+          xr.one("initialized", () => {
+            navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+                if (supported) {
+                    enableVideoXR();
+                    window.examplePlayer.play();
+                } else {
+                    console.log('web xr device not found, using orbit controls');
+                }
+            });
+          }); 
+        }(window, window.videojs));  
+    }
+    
+    function enableVideoXR() {
+      window.dispatchEvent(new window.Event('vrdisplayactivate'));      
+    }
+
+ 
+  </script>

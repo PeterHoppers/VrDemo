@@ -173,30 +173,29 @@
   // Start the XR application.
   initXR();
 
-  createWindowPlayer();
+  //create the video player
+  (function(window, videojs) {
+        var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
+        var xr = window.xr = examplePlayer.xr();
+  }(window, window.videojs));
 
-  /*document.getElementById("xr-button").addEventListener("click", () => { 
-      console.log("Clicked!!");
-      setTimeout(() => {
-        console.log("In has been 5 seconds since click");
-        xrSession.end();        
-      }, 1000);
-
-      setTimeout(() => {
-        enableVideoXR();  
-        window.examplePlayer.play();   
-      }, 2000);
-    });*/
-  
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
     if (xrSession) {
       xrSession.end();
     }
 
-    setTimeout(() => {
+    const promiseTest = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    }).catch(() => {
+      console.log('Unable to start the next XR session.');
+    });
+
+    promiseTest.then(() => {
       enableVideoXR();  
-      window.examplePlayer.play();   
-    }, 1000);
+      window.examplePlayer.play();
+    });
   });
 
   document.getElementById("xr-transition-scene").addEventListener("click", () => { 
@@ -217,25 +216,10 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.code == "KeyS") {
-      xrSession.end().then(() => {
-        enableVideoXR();  
-        window.examplePlayer.play();      
-      });
-    }
-    else if (event.code == "KeyP") {
-      window.examplePlayer.play();
-    } else if (event.code == "KeyQ") {
-      enableVideoXR();
+    if (event.code == "KeyL") {
+      window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
     }
   });
-
-  function createWindowPlayer() {
-    (function(window, videojs) {
-        var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
-        var xr = window.xr = examplePlayer.xr();
-      }(window, window.videojs));  
-  }
   
   function enableVideoXR() {
     console.log("Enabling another session!");
