@@ -185,16 +185,19 @@
     }
 
     const promiseTest = new Promise((resolve, reject) => {
+      console.log("Starting promise.");
       setTimeout(() => {
+        console.log("Resolving promise.");
         resolve();
       }, 1000);
+    }).then(() => {
+      console.log("Performing promise.");
+      enableVideoXR();  
+      window.examplePlayer.play().then(() => {
+        console.log("Playing.");
+      });
     }).catch(() => {
       console.log('Unable to start the next XR session.');
-    });
-
-    promiseTest.then(() => {
-      enableVideoXR();  
-      window.examplePlayer.play();
     });
   });
 
