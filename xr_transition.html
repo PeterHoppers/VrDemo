@@ -123,6 +123,10 @@
 
   // Called every time the XRSession requests that a new frame be drawn.
   function onXRFrame(time, frame) {
+    if (!xrSession) {
+      console.log("Tried calling 'onXRFrame' when there was no xrSession");
+      return;
+    }
     let session = frame.session;
 
     // Inform the session that we're ready for the next frame.
@@ -175,8 +179,11 @@
 
   //create the video player
   (function(window, videojs) {
-        var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
-        var xr = window.xr = examplePlayer.xr();
+      var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
+      var xr = window.xr = examplePlayer.xr();
+      window.examplePlayer.on("ready", () => {
+        console.log("Ready!");
+    });
   }(window, window.videojs));
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
@@ -191,11 +198,11 @@
         resolve();
       }, 1000);
     }).then(() => {
-      console.log("Performing promise.");
-      enableVideoXR();  
+      console.log("Performing promise.");      
       window.examplePlayer.play().then(() => {
-        console.log("Playing.");
-      });
+        enableVideoXR();
+        console.log("Now playing.");
+      });      
     }).catch(() => {
       console.log('Unable to start the next XR session.');
     });
