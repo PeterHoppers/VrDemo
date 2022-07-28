@@ -229,11 +229,11 @@
       setTimeout(() => {
         console.log("Resolving promise.");
         resolve();
-      }, 1500);
+      }, 5500);
     }).then(() => {      
+      console.log("Now playing.");    
       window.examplePlayer.play();
       enableVideoXR();
-      console.log("Now playing.");     
     }).catch(() => {
       console.log('Unable to start the next XR session.');
     });
