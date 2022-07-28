@@ -182,7 +182,7 @@
   initXR();
 
   //testing switching video
-  const videoSrc = document.querySelector("main video");
+  //const videoSrc = document.querySelector("main video");
 
   const src1 = "./hoast_analyzer_trim.mp4";
   const src2 = "./eagle-360_Trim.mp4";
@@ -234,19 +234,22 @@
     window.dispatchEvent(new window.Event('vrdisplayactivate'));      
   }
 
-  function switchVideo() {
-    window.dispatchEvent(new window.Event('vrdisplaydeactivate'));  
+  function switchVideo() {    
+    console.log("Before", window.examplePlayer.currentSrc());
     if (isSource1) {
-      videoSrc.src = src2;
+      window.examplePlayer.src([{
+        type: "video/mp4", src: src2
+      }]);
       isSource1 = false;
     } else {
-      videoSrc.src = src1;
+      window.examplePlayer.src([{
+        type: "video/mp4", src: src1
+      }]);
       isSource1 = true;
     }
 
-    setTimeout(() => {
-      enableVideoXR();
-    }, 500);
+    console.log("After", window.examplePlayer.currentSrc());
+    window.xr.init();
   }
 
   function transitionToVideo() {

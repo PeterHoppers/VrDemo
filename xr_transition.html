@@ -250,4 +250,12 @@
   }
 
 })();
+//https://github.com/immersive-web/webxr/issues/779#issuecomment-532995305
+
+/*
+    Listen to a user-activation event, such as click
+    In the event handler, first start video playback and attach a .then() to the returned promise that pauses the video.
+    Request an XR session.
+    When the session resolves, start video playback again.
+*/
 </script>
