@@ -43,6 +43,7 @@
   let xrButton = document.getElementById('xr-button');
   let xrSession = null;
   let xrRefSpace = null;
+  let xrAnimationId = 0;
 
   // WebGL scene globals.
   let gl = null;
@@ -103,7 +104,7 @@
       xrRefSpace = refSpace;
 
       // Inform the session that we're ready to begin drawing.
-      session.requestAnimationFrame(onXRFrame);
+      xrAnimationId = session.requestAnimationFrame(onXRFrame);
     });
   }
 
@@ -113,6 +114,7 @@
   // discarded.
   function onSessionEnded(event) {
     console.log("We've ended the session!");
+    xrSession.cancelAnimationFrame(xrAnimationId);
     xrSession = null;
     xrButton.textContent = 'Enter VR';
 
@@ -123,6 +125,7 @@
 
   // Called every time the XRSession requests that a new frame be drawn.
   function onXRFrame(time, frame) {
+    console.log("Creating a new frame.");
     if (!xrSession) {
       console.log("Tried calling 'onXRFrame' when there was no xrSession");
       return;
@@ -130,7 +133,7 @@
     let session = frame.session;
 
     // Inform the session that we're ready for the next frame.
-    session.requestAnimationFrame(onXRFrame);
+    xrAnimationId = session.requestAnimationFrame(onXRFrame);
 
     // Get the XRDevice pose relative to the reference space we created
     // earlier.
@@ -187,25 +190,7 @@
   }(window, window.videojs));
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
-    if (xrSession) {
-      xrSession.end();
-    }
-
-    const promiseTest = new Promise((resolve, reject) => {
-      console.log("Starting promise.");
-      setTimeout(() => {
-        console.log("Resolving promise.");
-        resolve();
-      }, 1000);
-    }).then(() => {
-      console.log("Performing promise.");      
-      window.examplePlayer.play().then(() => {
-        enableVideoXR();
-        console.log("Now playing.");
-      });      
-    }).catch(() => {
-      console.log('Unable to start the next XR session.');
-    });
+    transitionToVideo();
   });
 
   document.getElementById("xr-transition-scene").addEventListener("click", () => { 
@@ -228,12 +213,36 @@
   document.addEventListener("keydown", (event) => {
     if (event.code == "KeyL") {
       window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
+    } else if (event.code == "KeyV") {
+      transitionToVideo();
     }
   });
   
   function enableVideoXR() {
     console.log("Enabling another session!");
     window.dispatchEvent(new window.Event('vrdisplayactivate'));      
+  }
+
+  function transitionToVideo() {
+    if (xrSession) {
+      xrSession.end();
+    }
+
+    const promiseTest = new Promise((resolve, reject) => {
+      console.log("Starting promise.");
+      setTimeout(() => {
+        console.log("Resolving promise.");
+        resolve();
+      }, 1000);
+    }).then(() => {
+      console.log("Performing promise.");      
+      window.examplePlayer.play().then(() => {
+        enableVideoXR();
+        console.log("Now playing.");
+      });      
+    }).catch(() => {
+      console.log('Unable to start the next XR session.');
+    });
   }
 
 })();
