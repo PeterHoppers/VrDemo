@@ -5,7 +5,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
     <meta name='mobile-web-app-capable' content='yes'>
     <meta name='apple-mobile-web-app-capable' content='yes'>
-    <title>WebXR Testing Instant Transitions 3.js</title>
+    <title>WebXR Testing Instant Transitions 3.js With No Promise</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
       html, body {
@@ -143,21 +143,11 @@
       renderer.xr.getSession().end();
     }
 
-    const promiseTest = new Promise((resolve, reject) => {
-      console.log("Starting promise.");
-      setTimeout(() => {
-        console.log("Resolving promise.");
-        resolve();
-      }, 1000);
-    }).then(() => {
-      console.log("Performing promise.");      
-      window.examplePlayer.play().then(() => {
-        enableVideoXR();
-        console.log("Now playing.");
-      });      
-    }).catch(() => {
-      console.log('Unable to start the next XR session.');
-    });
+    setTimeout(() => {
+      console.log("Starting video");
+      enableVideoXR();  
+      window.examplePlayer.play();   
+    }, 1000);
   });
 
   document.getElementById("xr-transition-scene").addEventListener("click", () => { 
