@@ -181,13 +181,7 @@
   initXR();
 
   //create the video player
-  (function(window, videojs) {
-      var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
-      var xr = window.xr = examplePlayer.xr();
-      window.examplePlayer.on("ready", () => {
-        console.log("Ready!");
-    });
-  }(window, window.videojs));
+  //createVideoPlayer()
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
     transitionToVideo();
@@ -228,21 +222,31 @@
       xrSession.end();
     }
 
+    createVideoPlayer();
+
     const promiseTest = new Promise((resolve, reject) => {
       console.log("Starting promise.");
       setTimeout(() => {
         console.log("Resolving promise.");
         resolve();
-      }, 1000);
-    }).then(() => {
-      console.log("Performing promise.");      
-      window.examplePlayer.play().then(() => {
-        enableVideoXR();
-        console.log("Now playing.");
-      });      
+      }, 1500);
+    }).then(() => {      
+      window.examplePlayer.play();
+      enableVideoXR();
+      console.log("Now playing.");     
     }).catch(() => {
       console.log('Unable to start the next XR session.');
     });
+  }
+
+  function createVideoPlayer() {
+    (function(window, videojs) {
+      var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
+      var xr = window.xr = examplePlayer.xr();
+      window.examplePlayer.on("ready", () => {
+        console.log("Ready!");
+    });
+  }(window, window.videojs));
   }
 
 })();
