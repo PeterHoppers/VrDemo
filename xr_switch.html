@@ -23,7 +23,7 @@
   </head>
   <body>
     <main>
-      <video id="videojs-xr-player" class="video-js vjs-default-skin" controls style="display:none">
+      <video id="videojs-xr-player" class="video-js vjs-default-skin" controls>
         <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
       </video>
     </main>  
@@ -190,7 +190,7 @@
   let isSource1 = true;
 
   //create the video player
-  //createVideoPlayer()
+  createVideoPlayer();
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
     transitionToVideo();
@@ -224,6 +224,7 @@
       transitionToVideo();
     } else if (event.code == "KeyQ") {
       switchVideo();
+      window.examplePlayer.play();
     } else if (event.code == "KeyP") {
       window.examplePlayer.play();
     }
@@ -249,7 +250,15 @@
     }
 
     console.log("After", window.examplePlayer.currentSrc());
-    window.xr.init();
+    if (window.xr) {
+      window.xr.init();
+      window.xr.one("initialized", () => {
+        console.log("Started!");
+        window.xr.xrActive = true;
+      });
+      console.log("The whole xr", window.xr);
+      console.log("The animation frame id", window.xr.animationFrameId_);
+    }
   }
 
   function transitionToVideo() {
@@ -257,7 +266,7 @@
       xrSession.end();
     }
 
-    createVideoPlayer();
+    //createVideoPlayer();
 
     const promiseTest = new Promise((resolve, reject) => {
       console.log("Starting promise.");
@@ -268,7 +277,9 @@
     }).then(() => {      
       console.log("Now playing.");    
       window.examplePlayer.play();
-      enableVideoXR();
+      if (window.xr) {
+        enableVideoXR();
+      }
     }).catch(() => {
       console.log('Unable to start the next XR session.');
     });
