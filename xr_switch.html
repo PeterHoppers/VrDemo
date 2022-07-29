@@ -251,13 +251,26 @@
 
     console.log("After", window.examplePlayer.currentSrc());
     if (window.xr) {
-      window.xr.init();
+      const xr = window.xr;
+      /*
+        let session = window.xr.currentSession;
+        window.xr.dispose();
+        const xr = window.xr;examplePlayer.xr();
+        xr.currentSession = session;
+      */
+      xr.init();      
       window.xr.one("initialized", () => {
-        console.log("Started!");
+        xr.currentSession.requestReferenceSpace('local')
+        .then((referenceSpace) => {
+            xr.xrReferenceSpace = referenceSpace;
+        });
+        window.xr.renderer.xr.setSession(window.xr.currentSession);
+        window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
+        window.xr.currentSession.addEventListener('end', window.xr.onXRSessionEnd_);
         window.xr.xrActive = true;
+        window.xr.controls3d.disable();  
+        xr.camera.position.set(0, 0, 0);     
       });
-      console.log("The whole xr", window.xr);
-      console.log("The animation frame id", window.xr.animationFrameId_);
     }
   }
 
