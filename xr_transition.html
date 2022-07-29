@@ -70,8 +70,11 @@
   // Called when the user clicks the button to enter XR. If we don't have a
   // session we'll request one, and if we do have a session we'll end it.
   function onButtonClicked() {
+    var sessionInit = {
+      optionalFeatures: ['local-floor']
+    };
     if (!xrSession) {
-      navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
+      navigator.xr.requestSession('immersive-vr', sessionInit).then(onSessionStarted);
     } else {
       xrSession.end();
     }
@@ -181,7 +184,7 @@
   initXR();
 
   //create the video player
-  //createVideoPlayer()
+  createVideoPlayer()
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
     transitionToVideo();
@@ -218,22 +221,23 @@
   }
 
   function transitionToVideo() {
-    if (xrSession) {
+    /*if (xrSession) {
       xrSession.end();
     }
 
-    createVideoPlayer();
+    createVideoPlayer();*/
 
     const promiseTest = new Promise((resolve, reject) => {
       console.log("Starting promise.");
       setTimeout(() => {
         console.log("Resolving promise.");
         resolve();
-      }, 5500);
+      }, 500);
     }).then(() => {      
       console.log("Now playing.");    
       window.examplePlayer.play();
-      enableVideoXR();
+      xrSession.cancelAnimationFrame(xrAnimationId);
+      updateVideoSession(xrSession);
     }).catch(() => {
       console.log('Unable to start the next XR session.');
     });
@@ -247,6 +251,16 @@
         console.log("Ready!");
     });
   }(window, window.videojs));
+  }
+
+  function updateVideoSession(session) {
+    session.requestReferenceSpace('local')
+    .then((referenceSpace) => {
+        xr.xrReferenceSpace = referenceSpace;
+    });
+    window.xr.renderer.xr.setSession(session);
+    window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
+    session.addEventListener('end', window.xr.onXRSessionEnd_);
   }
 
 })();

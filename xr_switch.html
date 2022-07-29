@@ -23,7 +23,7 @@
   </head>
   <body>
     <main>
-      <video id="videojs-xr-player" class="video-js vjs-default-skin" controls>
+      <video id="videojs-xr-player" class="video-js vjs-default-skin" controls style="display: none;">
         <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
       </video>
     </main>  
@@ -71,8 +71,11 @@
   // Called when the user clicks the button to enter XR. If we don't have a
   // session we'll request one, and if we do have a session we'll end it.
   function onButtonClicked() {
+    var sessionInit = {
+      optionalFeatures: ['local-floor']
+    };
     if (!xrSession) {
-      navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
+      navigator.xr.requestSession('immersive-vr', sessionInit).then(onSessionStarted);
     } else {
       xrSession.end();
     }
@@ -217,6 +220,7 @@
       }, 1000);
   });
 
+  /// ======================== ALLL THE BUTTTON PRESSES!
   document.addEventListener("keydown", (event) => {
     if (event.code == "KeyL") {
       window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
@@ -224,7 +228,6 @@
       transitionToVideo();
     } else if (event.code == "KeyQ") {
       switchVideo();
-      window.examplePlayer.play();
     } else if (event.code == "KeyP") {
       window.examplePlayer.play();
     }
@@ -261,44 +264,43 @@
       */
       xr.init();      
       window.xr.one("initialized", () => {
-        xr.currentSession.requestReferenceSpace('local')
-        .then((referenceSpace) => {
-            xr.xrReferenceSpace = referenceSpace;
-        });
-        window.xr.renderer.xr.setSession(window.xr.currentSession);
-        window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
-        window.xr.currentSession.addEventListener('end', window.xr.onXRSessionEnd_);
+        updateVideoSession(window.xr.currentSession);       
         window.xr.xrActive = true;
-        window.xr.controls3d.disable();  
-        xr.camera.position.set(0, 0, 0);     
+        window.xr.controls3d.disable();
+        window.examplePlayer.play();
       });
     }
 
-    }, 6000);
+    }, 500);
   }
 
   function transitionToVideo() {
-    if (xrSession) {
+    /*if (xrSession) {
       xrSession.end();
-    }
+    }*/
 
+    let currentSession = xrSession
+
+    //simulate the xrSession ending
+    xrSession.cancelAnimationFrame(xrAnimationId);
+    xrSession = null;
+    gl = null;
     //createVideoPlayer();
 
     const promiseTest = new Promise((resolve, reject) => {
       console.log("Starting promise.");
-      setTimeout(() => {
+      setTimeout(() => {        
         console.log("Resolving promise.");
         resolve();
-      }, 500);
+      }, 5500);
     }).then(() => {      
       console.log("Now playing.");    
+      updateVideoSession(currentSession);
+      window.xr.currentSession = currentSession;
       window.examplePlayer.play();
-      if (window.xr) {
-        enableVideoXR();
-      }
     }).catch(() => {
       console.log('Unable to start the next XR session.');
-    });
+    });  
   }
 
   function createVideoPlayer() {
@@ -308,7 +310,17 @@
       window.examplePlayer.on("ready", () => {
         console.log("Ready!");
     });
-  }(window, window.videojs));
+    }(window, window.videojs));
+  }
+
+  function updateVideoSession(session) {
+    session.requestReferenceSpace('local')
+    .then((referenceSpace) => {
+        xr.xrReferenceSpace = referenceSpace;
+    });
+    window.xr.renderer.xr.setSession(session);
+    window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
+    session.addEventListener('end', window.xr.onXRSessionEnd_);
   }
 
 })();
