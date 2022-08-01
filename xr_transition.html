@@ -229,13 +229,21 @@
     xrSession.cancelAnimationFrame(xrAnimationId);
     gl = null;
 
+    window.xr.renderer.xr.setReferenceSpaceType('local');
+
     //mimic activating xr when it finds a session    
     window.xr.renderer.xr.addEventListener("sessionstart", () => {
+      xrSession.requestReferenceSpace('local')
+      .then((referenceSpace) => {
+        window.xr.xrReferenceSpace = referenceSpace;
+        window.xr.renderer.xr.referenceSpace = referenceSpace;
+        //window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
+        window.xr.xrActive = true;
+        window.examplePlayer.play();
+      });
       console.log("Session started (fake)!");
-      window.xr.xrReferenceSpace = window.xr.renderer.xr.getReferenceSpace();
-      window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
-      window.xr.xrActive = true;
-      window.examplePlayer.play();
+      //let newReference = window.xr.renderer.xr.getReferenceSpace();
+      //window.xr.xrReferenceSpace = newReference;      
     });
 
     window.xr.currentSession = xrSession;
