@@ -27,7 +27,7 @@
         <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
       </video>
     </main>  
-    <button id="xr-button" class="barebones-button" disabled>Enter XR</button>
+    <button id="xr-button" class="barebones-button">Enter XR</button>
     <button id="xr-switch-video" class="barebones-button">XR Switch Video</button>
   </body>
 </html>
@@ -67,13 +67,10 @@
   });
   
   function enableVideoXR() {
-    console.log("Enabling another session!");
     window.dispatchEvent(new window.Event('vrdisplayactivate'));      
   }
 
   function switchVideo() {    
-    setTimeout(() => {
-    console.log("Before", window.examplePlayer.currentSrc());
     if (isSource1) {
       window.examplePlayer.src([{
         type: "video/mp4", src: src2
@@ -86,44 +83,22 @@
       isSource1 = true;
     }   
 
-    console.log("After", window.examplePlayer.currentSrc());
     if (window.xr) {
-      const xr = window.xr;
-      /*
-        let session = window.xr.currentSession;
-        window.xr.dispose();
-        const xr = window.xr;examplePlayer.xr();
-        xr.currentSession = session;
-      */
+      const xr = window.xr;      
       xr.init();      
-      window.xr.one("initialized", () => {
-        updateVideoSession(window.xr.currentSession);       
-        window.xr.xrActive = true;
-        window.xr.controls3d.disable();
+      xr.one("initialized", () => {
+        xr.renderer.xr.setSession(window.xr.currentSession);
+        xr.xrActive = true;
+        xr.controls3d.disable();
         window.examplePlayer.play();
       });
     }
-
-    }, 500);
   }
 
   function createVideoPlayer() {
     (function(window, videojs) {
       var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
       var xr = window.xr = examplePlayer.xr();
-      window.examplePlayer.on("ready", () => {
-        console.log("Ready!");
-    });
     }(window, window.videojs));
-  }
-
-  function updateVideoSession(session) {
-    session.requestReferenceSpace('local')
-    .then((referenceSpace) => {
-        xr.xrReferenceSpace = referenceSpace;
-    });
-    window.xr.renderer.xr.setSession(session);
-    window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
-    session.addEventListener('end', window.xr.onXRSessionEnd_);
   }
 </script>
