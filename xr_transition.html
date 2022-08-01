@@ -212,6 +212,8 @@
       window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
     } else if (event.code == "KeyV") {
       transitionToVideo();
+    } else if (event.code == "KeyP") {
+      window.examplePlayer.play();
     }
   });
   
@@ -221,26 +223,26 @@
   }
 
   function transitionToVideo() {
-    /*if (xrSession) {
-      xrSession.end();
-    }
+    console.log("Now playing.");
 
-    createVideoPlayer();*/
+    //mimic session ending
+    xrSession.cancelAnimationFrame(xrAnimationId);
+    gl = null;
 
-    const promiseTest = new Promise((resolve, reject) => {
-      console.log("Starting promise.");
-      setTimeout(() => {
-        console.log("Resolving promise.");
-        resolve();
-      }, 500);
-    }).then(() => {      
-      console.log("Now playing.");    
+    //mimic activating xr when it finds a session    
+    window.xr.renderer.xr.addEventListener("sessionstart", () => {
+      console.log("Session started (fake)!");
+      window.xr.xrReferenceSpace = window.xr.renderer.xr.getReferenceSpace();
+      window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
+      window.xr.xrActive = true;
       window.examplePlayer.play();
-      xrSession.cancelAnimationFrame(xrAnimationId);
-      updateVideoSession(xrSession);
-    }).catch(() => {
-      console.log('Unable to start the next XR session.');
     });
+
+    window.xr.currentSession = xrSession;
+    window.xr.renderer.xr.setSession(xrSession);
+    console.log("XR parent", window.xr.renderer);
+
+    //play the video to prevent a black screen on transition
   }
 
   function createVideoPlayer() {
@@ -251,16 +253,6 @@
         console.log("Ready!");
     });
   }(window, window.videojs));
-  }
-
-  function updateVideoSession(session) {
-    session.requestReferenceSpace('local')
-    .then((referenceSpace) => {
-        xr.xrReferenceSpace = referenceSpace;
-    });
-    window.xr.renderer.xr.setSession(session);
-    window.xr.animationFrameId_ = window.xr.requestAnimationFrame(window.xr.animate_);
-    session.addEventListener('end', window.xr.onXRSessionEnd_);
   }
 
 })();
