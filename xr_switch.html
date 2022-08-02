@@ -29,6 +29,7 @@
     </main>  
     <button id="xr-button" class="barebones-button">Enter XR</button>
     <button id="xr-switch-video" class="barebones-button">XR Switch Video</button>
+    <h2>Press 'Q' to also switch videos.</h2>
   </body>
 </html>
 <script async="" src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
@@ -36,8 +37,6 @@
 <script src = "./videojs-xr.js"></script>
 <script>
   //testing switching video
-  //const videoSrc = document.querySelector("main video");
-
   const src1 = "./hoast_analyzer_trim.mp4";
   const src2 = "./eagle-360_Trim.mp4";
 
@@ -46,7 +45,8 @@
   //create the video player
   createVideoPlayer();
 
-  document.getElementById("xr-button").addEventListener("click", () => { 
+  document.getElementById("xr-button").addEventListener("click", () => {
+    window.xr.cancelAnimationFrame(window.xr.animationFrameId_);
     enableVideoXR();
     window.examplePlayer.play();
   });
@@ -87,6 +87,7 @@
       const xr = window.xr;      
       window.examplePlayer.pause();
       xr.init();      
+      window.xr.cancelAnimationFrame(window.xr.animationFrameId_);
       xr.one("initialized", () => {
         xr.renderer.xr.setSession(window.xr.currentSession);
         xr.xrActive = true;
