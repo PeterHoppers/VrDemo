@@ -228,7 +228,6 @@
 
     //mimic activating xr when it finds a session    
     window.xr.renderer.xr.addEventListener("sessionstart", () => {
-      console.log("Session started (fake)!");
       window.xr.xrReferenceSpace = window.xr.renderer.xr.getReferenceSpace();
       window.xr.xrActive = true;
     });

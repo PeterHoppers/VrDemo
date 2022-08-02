@@ -28,7 +28,6 @@
         <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
     </main>    
     <button id="xr-transition-video" class="barebones-button">XR Video</button>
-    <button id="xr-transition-scene" class="barebones-button">XR Normal Scene</button>
   </body>
 </html>
 <script type="importmap">
@@ -139,6 +138,23 @@
   }(window, window.videojs));
 
   document.getElementById("xr-transition-video").addEventListener("click", () => { 
+    transition();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.code == "KeyL") {
+      window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
+    } else if (event.code == "KeyT") {
+      transition();
+    }
+  });
+  
+  function enableVideoXR() {
+    console.log("Enabling another session!");
+    window.dispatchEvent(new window.Event('vrdisplayactivate'));      
+  }
+
+  function transition() {
     if (renderer.xr.getSession()) {
       renderer.xr.getSession().end();
     }
@@ -148,33 +164,5 @@
       enableVideoXR();  
       window.examplePlayer.play();   
     }, 1000);
-  });
-
-  document.getElementById("xr-transition-scene").addEventListener("click", () => { 
-      console.log("Ending the Video Scene!");
-      window.dispatchEvent(new window.Event('vrdisplaydeactivate'));  
-
-      setTimeout(() => {
-        navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
-          if (supported) {
-            // Updates the button to start an XR session when clicked.
-            xrButton.addEventListener('click', onButtonClicked);
-            xrButton.textContent = 'Enter VR';
-            xrButton.disabled = false;
-            onButtonClicked();
-          }
-        });        
-      }, 1000);
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.code == "KeyL") {
-      window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
-    }
-  });
-  
-  function enableVideoXR() {
-    console.log("Enabling another session!");
-    window.dispatchEvent(new window.Event('vrdisplayactivate'));      
   }
 </script>

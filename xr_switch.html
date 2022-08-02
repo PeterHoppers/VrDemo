@@ -85,6 +85,7 @@
 
     if (window.xr) {
       const xr = window.xr;      
+      window.examplePlayer.pause();
       xr.init();      
       xr.one("initialized", () => {
         xr.renderer.xr.setSession(window.xr.currentSession);
