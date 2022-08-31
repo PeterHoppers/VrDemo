@@ -59,4 +59,9 @@
   function enableVideoXR() {
     window.dispatchEvent(new window.Event('vrdisplayactivate'));
   }
+
+  window.addEventListener("message", (event) => {
+    window.dispatchEvent(new window.Event('vrdisplayactivate'));
+    window.examplePlayer.play();
+  }, false);
 </script>
