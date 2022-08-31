@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
+    <meta name='mobile-web-app-capable' content='yes'>
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <title>WebXR Testing Text Over Video</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+      html, body {
+          height: 100%;
+          margin: 0;
+      }
+      #c {
+          width: 100%;
+          height: 100%;
+          display: block;
+      }
+      </style>
+    <link href="./video-js.css" rel="stylesheet">
+    <link href="./videojs-xr.css" rel="stylesheet">
+  </head>
+  <body>
+    <main>
+      <video id="videojs-xr-player" class="video-js vjs-default-skin" controls style="display: none;">
+        <source src="./hoast_analyzer_trim.mp4" type="video/mp4">
+      </video>
+    </main>  
+    <button id="xr-button" class="barebones-button">Enter XR</button>
+  </body>
+</html>
+<script async="" src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+<script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
+<script src = "./videojs-xr.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "./ref/three.module.js"
+    }
+  }
+  </script>
+<script type="module">  
+  import * as THREE from 'three';
+  import { CSS3DRenderer, CSS3DObject } from './ref/CSS3DRenderer.js';
+  //create the video player
+  (function(window, videojs) {
+      var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
+      var xr = window.xr = examplePlayer.xr();
+
+      xr.one("initialized", () => {
+        console.log(xr.scene);
+        const loggingElement = document.createElement("div");
+        loggingElement.textContent = "Hello there! I am testing if this works";
+        const objectCSS = new CSS3DObject( loggingElement );
+        console.log(objectCSS);
+        objectCSS.position.x = 10;
+        objectCSS.position.y = 1.6;
+        objectCSS.position.z = 0;
+        xr.scene.add( objectCSS );
+      });
+  }(window, window.videojs));
+
+  document.getElementById("xr-button").addEventListener("click", () => {
+    enableVideoXR();
+    window.examplePlayer.play();
+  });
+
+  /// ======================== ALLL THE BUTTTON PRESSES!
+  document.addEventListener("keydown", (event) => {
+    if (event.code == "KeyL") {
+      window.dispatchEvent(new window.Event('vrdisplaydeactivate'));
+    } else if (event.code == "KeyP") {
+      window.examplePlayer.play();
+    }
+  });
+  
+  function enableVideoXR() {
+    window.dispatchEvent(new window.Event('vrdisplayactivate'));      
+  }
+</script>
