@@ -43,21 +43,41 @@
 <script type="module">  
   import * as THREE from 'three';
   import { CSS3DRenderer, CSS3DObject } from './ref/CSS3DRenderer.js';
+  import { createText } from './ref/Text2D.js';
+
   //create the video player
   (function(window, videojs) {
       var examplePlayer = window.examplePlayer = videojs('videojs-xr-player');
       var xr = window.xr = examplePlayer.xr();
 
       xr.one("initialized", () => {
-        console.log(xr.scene);
-        const loggingElement = document.createElement("div");
-        loggingElement.textContent = "Hello there! I am testing if this works";
-        const objectCSS = new CSS3DObject( loggingElement );
-        console.log(objectCSS);
-        objectCSS.position.x = 10;
-        objectCSS.position.y = 1.6;
-        objectCSS.position.z = 0;
-        xr.scene.add( objectCSS );
+        //console.log(new THREE.SphereBufferGeometry(256, 32, 32));
+        //const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        //const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+        //const mesh = new THREE.Mesh( geometry, material );
+        const btn1 = createWords('Words floating in the air')
+        btn1.position.set( 0, 0, -15 );
+        xr.scene.add(btn1);
+
+        const btn2 = createWords('Words over here as well')
+        btn2.position.set( -15, 0, 5 );
+        btn2.rotation.set(0, 90, 0);
+        xr.scene.add(btn2);
+
+        const btn3 = createWords('Another set of words')
+        btn3.position.set( 15, 0, 5 );
+        btn3.rotation.set(0, -90, 0);
+        xr.scene.add(btn3);
+
+        const btn4 = createWords('The last set of words')
+        btn4.position.set( 0, 0, 20 );
+        btn4.rotation.set(0, 0, 0);
+        xr.scene.add(btn4);
+        
+        //mesh.position.y = 5.6;
+        //mesh.position.z = -2;
+        //xr.scene.add(new THREE.SphereBufferGeometry(256, 32, 32));
+        //xr.scene.add(mesh);
       });
   }(window, window.videojs));
 
@@ -77,5 +97,20 @@
   
   function enableVideoXR() {
     window.dispatchEvent(new window.Event('vrdisplayactivate'));      
+  }
+
+  function createWords(message) {
+    const resetButton = makeButtonMesh( 15, 1, .2, "#888" );
+    const resetButtonText = createText(message, 1 );
+    resetButton.add( resetButtonText );
+    resetButtonText.position.set( 0, 0, .11 );
+    return resetButton;
+  }
+
+  function makeButtonMesh( x, y, z, color ) {
+    const geometry = new THREE.BoxGeometry( x, y, z );
+    const material = new THREE.MeshBasicMaterial( { color: color } );
+    const buttonMesh = new THREE.Mesh( geometry, material );
+    return buttonMesh;
   }
 </script>
